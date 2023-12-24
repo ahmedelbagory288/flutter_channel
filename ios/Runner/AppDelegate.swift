@@ -16,7 +16,17 @@ import AVKit
                 return
             }
 
-            // Implement PiP mode logic here
+            if let keyWindow = UIApplication.shared.windows.first(where: { $0.isKeyWindow }) {
+                if #available(iOS 14.0, *) {
+                    keyWindow.windowScene?.supportsMultipleScenes = true
+                }
+
+                keyWindow.windowLevel = UIWindow.Level.normal
+                keyWindow.makeKeyAndVisible()
+                keyWindow.windowScene?.sizeRestrictions?.maximumSize = UIScreen.main.bounds.size
+                keyWindow.windowScene?.activationConditions.canActivateForTargetContentIdentifierPredicate = NSPredicate(value: true)
+                keyWindow.windowScene?.activationConditions.prefersToActivateForTargetContentIdentifierPredicate = NSPredicate(value: true)
+            }
 
             result(nil)
         })
