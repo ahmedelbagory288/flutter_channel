@@ -1,37 +1,84 @@
 import UIKit
 import Flutter
-import AVKit
 
 @UIApplicationMain
 @objc class AppDelegate: FlutterAppDelegate {
-    override func application(
-        _ application: UIApplication,
-        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
-    ) -> Bool {
-        let flutterViewController: FlutterViewController = window?.rootViewController as! FlutterViewController
-        let piPChannel = FlutterMethodChannel(name: "flutter_channel", binaryMessenger: flutterViewController.binaryMessenger)
-        piPChannel.setMethodCallHandler({ [weak self] (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
+  override func application(
+    _ application: UIApplication,
+    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
+  ) -> Bool {
+
+   let controller : FlutterViewController = window?.rootViewController as! FlutterViewController
+      let channel = FlutterMethodChannel(name: "flutter_channel",
+                                                binaryMessenger: controller.binaryMessenger)
+
+//       channel.setMethodCallHandler({
+//         (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
+//         // This method is invoked on the UI thread.
+//       guard call.method == "getBatteryLevel" else {
+//           result(FlutterMethodNotImplemented)
+//           return
+//         }
+//         self?.receiveBatteryLevel(result: result)
+//       })
+
+
+//          channel.setMethodCallHandler({(call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
+//         guard call.method == "enterPiPMode" else {
+//             result(FlutterMethodNotImplemented)
+//             return
+//             }
+//              if let keyWindow = UIApplication.shared.windows.first(where: { $0.isKeyWindow }),
+//                  let rootViewController = keyWindow.rootViewController {
+//                     let player = AVPlayer()
+//                     let playerViewController = AVPlayerViewController()
+//                     playerViewController.player = player
+//
+//                     if #available(iOS 14.0, *) {
+//                         playerViewController.allowsPictureInPicturePlayback = true
+//                     }
+//
+//                     rootViewController.present(playerViewController, animated: true) {
+//                         player.play()
+//                     }
+//                 }
+//         })
+//
+
+       channel.setMethodCallHandler { [weak self] (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
             guard call.method == "enterPiPMode" else {
                 result(FlutterMethodNotImplemented)
                 return
             }
 
-            if let keyWindow = UIApplication.shared.windows.first(where: { $0.isKeyWindow }) {
+            if let keyWindow = UIApplication.shared.windows.first(where: { $0.isKeyWindow }),
+               let rootViewController = keyWindow.rootViewController {
                 if #available(iOS 14.0, *) {
-                    keyWindow.windowScene?.supportsMultipleScenes = true
+                    rootViewController.canBecomeOverlay = true
+                    rootViewController.isModalInPresentation = true
                 }
 
-                keyWindow.windowLevel = UIWindow.Level.normal
-                keyWindow.makeKeyAndVisible()
-                keyWindow.windowScene?.sizeRestrictions?.maximumSize = UIScreen.main.bounds.size
-                keyWindow.windowScene?.activationConditions.canActivateForTargetContentIdentifierPredicate = NSPredicate(value: true)
-                keyWindow.windowScene?.activationConditions.prefersToActivateForTargetContentIdentifierPredicate = NSPredicate(value: true)
+                rootViewController.view.window?.windowLevel = UIWindow.Level.statusBar + 1
             }
 
             result(nil)
-        })
+        }
+ 
+    GeneratedPluginRegistrant.register(with: self)
+    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+  }
 
-        GeneratedPluginRegistrant.register(with: self)
-        return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+
+        
+  private func receiveBatteryLevel(result: FlutterResult) {
+    let device = UIDevice.current
+    device.isBatteryMonitoringEnabled = true
+    if device.batteryState == UIDevice.BatteryState.unknown {
+      result(FlutterError(code: "UNAVAILABLE",
+                          message: "Battery level not available.",
+                          details: nil))
+    } else {
+      result(Int(device.batteryLevel * 100))
     }
+  }
 }
