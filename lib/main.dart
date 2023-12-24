@@ -51,12 +51,12 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
   Future<void> _pip() async {
-     try {
-       await platform.invokeMethod<int>('pip');
-     } on PlatformException catch (e) {
-      debugPrint("Failed to get battery level: '${e.message}'.");
-    }
 
+     try {
+       await platform.invokeMethod('enterPiPMode');
+     } on PlatformException catch (e) {
+       debugPrint('bego Error entering PiP mode: ${e.message}');
+     }
 
   }
   @override
@@ -79,7 +79,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       floatingActionButton: FloatingActionButton(
         // onPressed: _getBatteryLevel,
-        onPressed: _getBatteryLevel,
+          onPressed: _pip,
         tooltip: 'Increment',
         child: const Icon(Icons.add),
       ),
