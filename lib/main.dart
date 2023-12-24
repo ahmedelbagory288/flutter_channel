@@ -79,7 +79,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       floatingActionButton: FloatingActionButton(
         // onPressed: _getBatteryLevel,
-        onPressed: _pip,
+        onPressed: _getBatteryLevel,
         tooltip: 'Increment',
         child: const Icon(Icons.add),
       ),
